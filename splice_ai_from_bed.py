@@ -110,7 +110,7 @@ def load_bed_file(bed_file):
     bed_file (str): Path to BED file
     
     Yields:
-    Tuples (chrom, start, end, strand)
+    Tuples (chrom, start, end, strand, [remaining_fields])
     
     Raises:
     ValueError: If strand information is missing
@@ -124,7 +124,8 @@ def load_bed_file(bed_file):
             if strand not in ('+', '-'):
                 raise ValueError(f"Strand should be either '+' or '-'")
             start, end = int(start), int(end)
-            yield (chrom, start, end, strand)
+            remaining_fields = fields[4:] if len(fields) > 4 else []
+            yield (chrom, start, end, strand, remaining_fields)
 
 # load genome
 genome = pysam.FastaFile(args.genome)
@@ -137,10 +138,11 @@ bed_file = args.bed
 output_file = args.output
 
 with open(output_file, 'w') as out:
-    for chrom, start, end, strand in load_bed_file(bed_file):
+    for chrom, start, end, strand, remaining_fields in load_bed_file(bed_file):
         donor_probs, acceptor_probs = predict_single_region(chrom, start, end, strand, models)
         for i, (donor_prob, acceptor_prob) in enumerate(zip(donor_probs, acceptor_probs), start=start):
-            out.write(f"{chrom}\t{i}\t{i+1}\t{donor_prob}\t{acceptor_prob}\n")
+            fields = [chrom, str(i), str(i+1), str(donor_prob), str(acceptor_prob)] + remaining_fields
+            out.write('\t'.join(fields) + '\n')
 
 """
 
