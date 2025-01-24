@@ -31,7 +31,7 @@ python splice_ai_from_bed.py \
   --out test_data/test_single_regions_out.bed
 ```
 
-If you want to predict donor/acceptor probabilites of a single position X, make sure the BED file is of the form e.g.:
+If you want to predict donor/acceptor probabilites of a single position X on strand +, make sure the BED file is of the form e.g.:
 
 ```
 chr1  X  X+1  +
